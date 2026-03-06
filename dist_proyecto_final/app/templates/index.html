@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ app_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body class="min-h-screen bg-slate-950 text-white">
+    <header class="mx-auto max-w-7xl px-6 py-8">
+      <div class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 class="text-3xl font-bold tracking-tight">{{ app_name }}</h1>
+            <p class="mt-2 text-slate-300">Nodo central, clientes y reproducción literaria con análisis rítmico y trazabilidad.</p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button id="relayBtn" class="btn-primary rounded-2xl px-4 py-2 text-sm font-semibold">Levantar relay local</button>
+            <button id="refreshBtn" class="btn-secondary rounded-2xl px-4 py-2 text-sm font-semibold">Refrescar</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-6 pb-8 space-y-6">
+      <section class="grid gap-6 lg:grid-cols-3">
+        <div class="panel rounded-3xl p-6 lg:col-span-2">
+          <h2 class="text-xl font-semibold">Configuración distribuida</h2>
+          <p class="mt-2 text-sm text-slate-300">Asigna obra y BPM a cada procesador y lanza la ejecución distribuida.</p>
+          <div class="mt-5 grid gap-4 lg:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-3">
+              <div class="font-semibold">Cliente 1</div>
+              <input id="p1" class="field" value="procesador-a" />
+              <select id="f1" class="field">{% for file in files %}<option value="{{ file }}">{{ file }}</option>{% endfor %}</select>
+              <input id="b1" class="field" type="number" min="40" max="260" value="144" />
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-3">
+              <div class="font-semibold">Cliente 2</div>
+              <input id="p2" class="field" value="procesador-b" />
+              <select id="f2" class="field">{% for file in files %}<option value="{{ file }}">{{ file }}</option>{% endfor %}</select>
+              <input id="b2" class="field" type="number" min="40" max="260" value="110" />
+            </div>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button id="configureBtn" class="btn-primary rounded-2xl px-5 py-3 font-semibold">Enviar configuración</button>
+            <button id="startBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold">Enviar START</button>
+          </div>
+        </div>
+
+        <aside class="panel rounded-3xl p-6">
+          <h2 class="text-xl font-semibold">Estado del sistema</h2>
+          <div class="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div class="text-sm text-slate-400">Conectividad</div>
+            <div id="serverStatus" class="mt-2 text-2xl font-semibold">Sin conexión</div>
+          </div>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div class="text-sm text-slate-400">Eventos recibidos</div>
+              <div id="eventCount" class="mt-2 text-xl font-semibold">0</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div class="text-sm text-slate-400">ACK registrados</div>
+              <div id="deliveryCount" class="mt-2 text-xl font-semibold">0</div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="panel rounded-3xl p-6">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <h2 class="text-xl font-semibold">Reproducir obra</h2>
+            <p class="mt-2 text-sm text-slate-300">Ocupa todo el ancho para escuchar la obra completa o una cantidad concreta de eventos.</p>
+          </div>
+          <div class="flex w-full flex-wrap gap-3 xl:w-auto xl:justify-end">
+            <select id="previewFile" class="field min-w-[180px] flex-1 xl:flex-none">{% for file in files %}<option value="{{ file }}">{{ file }}</option>{% endfor %}</select>
+            <select id="previewLimit" class="field min-w-[160px] flex-1 xl:flex-none" title="Cantidad de eventos">
+              <option value="10">10 eventos</option>
+              <option value="50">50 eventos</option>
+              <option value="100">100 eventos</option>
+              <option value="150">150 eventos</option>
+              <option value="0" selected>Obra completa</option>
+            </select>
+            <button id="playBtn" class="btn-primary rounded-2xl px-5 py-3 font-semibold min-w-[140px]">Play</button>
+            <button id="pauseBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold min-w-[140px]" disabled>Pausa</button>
+            <button id="stopBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold min-w-[140px]" disabled>Stop</button>
+          </div>
+        </div>
+
+        <div class="mt-5 grid gap-4 lg:grid-cols-3">
+          <div class="rounded-2xl border border-white/10 bg-black/20 p-4 lg:col-span-2">
+            <div class="flex items-center justify-between gap-4 text-sm text-slate-300">
+              <div id="previewNow">Sin reproducción activa</div>
+              <div id="analysisBadge" class="text-emerald-300"></div>
+            </div>
+            <div class="mt-4 h-4 overflow-hidden rounded-full bg-white/10">
+              <div id="progressBar" class="h-full w-0 rounded-full bg-emerald-400 transition-all"></div>
+            </div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+              <span id="progressText">0%</span>
+              <span id="remainingText">Sin datos</span>
+            </div>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-slate-300">
+            <div class="font-semibold text-white">Análisis</div>
+            <div id="analysisBox" class="mt-3 space-y-2"></div>
+          </div>
+        </div>
+
+        <div id="previewLog" class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3"></div>
+      </section>
+
+      <section class="grid gap-6 lg:grid-cols-2">
+        <div class="panel rounded-3xl p-6">
+          <h2 class="text-xl font-semibold">Estado por cliente</h2>
+          <div id="processorState" class="mt-4 space-y-3 text-sm text-slate-300"></div>
+        </div>
+        <div class="panel rounded-3xl p-6">
+          <h2 class="text-xl font-semibold">Checklist</h2>
+          <ul class="mt-4 space-y-3 text-sm text-slate-300">
+            <li>• Arquitectura cliente-servidor con relay central.</li>
+            <li>• Logs con ACK, eventos y reconexión.</li>
+            <li>• Diferenciación entre prosa y verso.</li>
+            <li>• Mapeo MIDI multivariable.</li>
+            <li>• Reproducción completa o parcial.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="panel rounded-3xl p-6">
+        <h2 class="text-xl font-semibold">Log global del monitor</h2>
+        <div id="logList" class="mt-4 space-y-3"></div>
+      </section>
+    </main>
+
+    <script>
+      const logList = document.getElementById('logList');
+      const processorState = document.getElementById('processorState');
+      const serverStatus = document.getElementById('serverStatus');
+      const eventCount = document.getElementById('eventCount');
+      const deliveryCount = document.getElementById('deliveryCount');
+      const previewLog = document.getElementById('previewLog');
+      const previewNow = document.getElementById('previewNow');
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+      const remainingText = document.getElementById('remainingText');
+      const analysisBox = document.getElementById('analysisBox');
+      const analysisBadge = document.getElementById('analysisBadge');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      let latestState = null;
+      let audioContext = null;
+      let currentOscillators = [];
+      let playbackTimers = [];
+      let playbackState = { totalMs: 0, elapsedMs: 0, startedAt: 0, pausedAt: 0, isPaused: false, ended: false, intervalId: null };
+
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>\"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+      }
+
+      function midiToFrequency(note) {
+        return 440 * Math.pow(2, (Number(note) - 69) / 12);
+      }
+
+      function clearPlaybackTimers() {
+        for (const id of playbackTimers) clearTimeout(id);
+        playbackTimers = [];
+        if (playbackState.intervalId) clearInterval(playbackState.intervalId);
+        playbackState.intervalId = null;
+      }
+
+      async function stopPlayback(showFinished = false) {
+        clearPlaybackTimers();
+        currentOscillators.forEach(item => {
+          try { item.osc.stop(); } catch (_) {}
+        });
+        currentOscillators = [];
+        if (audioContext) {
+          try { await audioContext.close(); } catch (_) {}
+          audioContext = null;
+        }
+        pauseBtn.disabled = true;
+        stopBtn.disabled = true;
+        pauseBtn.textContent = 'Pausa';
+        if (showFinished) {
+          previewNow.textContent = 'Obra terminada';
+          progressBar.style.width = '100%';
+          progressText.textContent = '100%';
+          remainingText.textContent = 'Restante: 0.0 s';
+          refreshState();
+        }
+      }
+
+      function updateProgressLoop() {
+        clearInterval(playbackState.intervalId);
+        playbackState.intervalId = setInterval(() => {
+          if (playbackState.isPaused || playbackState.ended) return;
+          const elapsed = playbackState.elapsedMs + Math.max(0, performance.now() - playbackState.startedAt);
+          const ratio = Math.min(1, elapsed / Math.max(1, playbackState.totalMs));
+          progressBar.style.width = `${ratio * 100}%`;
+          progressText.textContent = `${Math.round(ratio * 100)}%`;
+          remainingText.textContent = `Restante: ${Math.max(0, (playbackState.totalMs - elapsed) / 1000).toFixed(1)} s`;
+        }, 120);
+      }
+
+      async function refreshState() {
+        const res = await fetch('/api/state');
+        const data = await res.json();
+        latestState = data;
+        const online = Boolean(data.connected);
+        const clientCount = (data.connected_clients || []).length;
+        serverStatus.textContent = online ? `Conectado · ${clientCount} cliente(s)` : (data.relay_port_open ? 'Relay arriba, monitor reconectando' : 'Sin conexión');
+        serverStatus.className = online ? 'mt-2 text-2xl font-semibold text-emerald-300' : 'mt-2 text-2xl font-semibold text-rose-300';
+        eventCount.textContent = (data.events || []).length;
+        deliveryCount.textContent = data.delivery_count || 0;
+
+        const processors = Object.values(data.processors || {});
+        processorState.innerHTML = processors.length
+          ? processors.map(item => `
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div class="flex items-center justify-between gap-4">
+                <div class="font-medium text-white">${escapeHtml(item.processor || item.from || 'nodo')}</div>
+                <div class="text-xs text-slate-400">${escapeHtml(item.ts || '')}</div>
+              </div>
+              <div class="mt-1 text-slate-300">${escapeHtml(item.command || 'sin estado')}</div>
+              <div class="mt-1 text-slate-400">${escapeHtml(item.file || item.token || item.message || '')}</div>
+            </div>
+          `).join('')
+          : '<div class="text-slate-500">Aún no hay eventos de clientes.</div>';
+
+        const events = data.events || [];
+        logList.innerHTML = events.length
+          ? events.slice(0, 40).map(item => `
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="font-medium text-white">${escapeHtml(item.ts || '')} · ${escapeHtml(item.processor || item.from || 'director')} · ${escapeHtml(item.command || 'EVENTO')}</div>
+                  <div class="mt-1 text-sm text-slate-400">${escapeHtml(item.message || item.file || item.token || '')}</div>
+                  <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.file || '')} ${item.index ? '· #' + escapeHtml(item.index) : ''} ${escapeHtml(item.message_id || '')}</div>
+                </div>
+                <div class="text-right text-xs text-slate-400">nota ${item.note ?? '-'} · vel ${item.velocity ?? '-'} ${item.total_events ? '· total ' + item.total_events : ''}</div>
+              </div>
+            </div>
+          `).join('')
+          : '<div class="text-slate-500">Sin eventos todavía.</div>';
+      }
+
+      async function startRelay() {
+        const res = await fetch('/api/relay/start', { method: 'POST' });
+        const data = await res.json();
+        alert(data.message || 'Relay listo');
+        setTimeout(refreshState, 400);
+      }
+
+      async function sendConfig() {
+        const payload = {
+          assignments: [
+            { processor: document.getElementById('p1').value.trim(), file_name: document.getElementById('f1').value, bpm: Number(document.getElementById('b1').value) },
+            { processor: document.getElementById('p2').value.trim(), file_name: document.getElementById('f2').value, bpm: Number(document.getElementById('b2').value) },
+          ]
+        };
+        const res = await fetch('/api/configure', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        alert(data.message || data.detail || 'Configuración enviada');
+        refreshState();
+      }
+
+      async function startRun() {
+        const res = await fetch('/api/start', { method: 'POST' });
+        const data = await res.json();
+        alert(data.message || data.detail || 'Ejecución iniciada');
+        refreshState();
+      }
+
+      async function playPreview() {
+        if (!latestState || !latestState.connected) {
+          alert('Primero levanta el relay y conecta el director antes de reproducir.');
+          return;
+        }
+        await stopPlayback(false);
+        const payload = {
+          file_name: document.getElementById('previewFile').value,
+          bpm: 132,
+          limit: Number(document.getElementById('previewLimit').value || 0),
+        };
+        const res = await fetch('/api/preview', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.detail || 'No se pudo preparar la reproducción');
+          return;
+        }
+        const events = data.events || [];
+        const analysis = data.analysis || {};
+        analysisBadge.textContent = analysis.work_type === 'verse' ? 'Mio Cid / verso' : 'Quijote / prosa';
+        analysisBox.innerHTML = `
+          <div>Tipo: <strong>${escapeHtml(analysis.work_type || '-')}</strong></div>
+          <div>Cadencia: <strong>${escapeHtml(analysis.cadence || '-')}</strong></div>
+          <div>Densidad léxica: <strong>${escapeHtml(analysis.lexical_density ?? '-')}</strong></div>
+          <div>Diversidad léxica: <strong>${escapeHtml(analysis.lexical_diversity ?? '-')}</strong></div>
+          <div>Longitud media: <strong>${escapeHtml(analysis.avg_unit_length ?? '-')}</strong></div>
+        `;
+        previewNow.textContent = events.length ? `Reproduciendo: ${data.file} · ${events.length} eventos` : 'No hay eventos para reproducir';
+        const maxLog = 60;
+        previewLog.innerHTML = events.slice(0, maxLog).map(item => `
+          <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div class="font-medium text-white">#${item.index} · ${escapeHtml(item.token)}</div>
+            <div class="mt-1 text-sm text-slate-400">Nota ${item.note} · ${item.duration_ms} ms · ${escapeHtml(item.category)}</div>
+          </div>
+        `).join('');
+        if (events.length > maxLog) {
+          previewLog.insertAdjacentHTML('beforeend', `<div class="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-slate-400">Mostrando ${maxLog} de ${events.length} eventos.</div>`);
+        }
+        if (!events.length) return;
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        pauseBtn.disabled = false;
+        stopBtn.disabled = false;
+        pauseBtn.textContent = 'Pausa';
+        currentOscillators = [];
+        let offset = audioContext.currentTime + 0.05;
+        let accumulatedMs = 0;
+        for (const item of events) {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.type = item.work_type === 'verse' ? 'triangle' : 'sine';
+          osc.frequency.value = midiToFrequency(item.note);
+          gain.gain.setValueAtTime(0.0001, offset);
+          gain.gain.exponentialRampToValueAtTime(0.08, offset + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, offset + item.duration_ms / 1000);
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.start(offset);
+          osc.stop(offset + item.duration_ms / 1000 + 0.03);
+          currentOscillators.push({ osc, gain });
+          offset += item.duration_ms / 1000;
+          accumulatedMs += item.duration_ms;
+        }
+        playbackState = { totalMs: accumulatedMs, elapsedMs: 0, startedAt: performance.now(), pausedAt: 0, isPaused: false, ended: false, intervalId: null };
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+        remainingText.textContent = `Restante: ${(accumulatedMs / 1000).toFixed(1)} s`;
+        updateProgressLoop();
+        playbackTimers.push(setTimeout(async () => {
+          playbackState.ended = true;
+          await stopPlayback(true);
+        }, accumulatedMs + 120));
+        refreshState();
+      }
+
+      async function togglePause() {
+        if (!audioContext) return;
+        if (audioContext.state === 'running') {
+          await audioContext.suspend();
+          playbackState.isPaused = true;
+          playbackState.pausedAt = performance.now();
+          playbackState.elapsedMs += Math.max(0, playbackState.pausedAt - playbackState.startedAt);
+          pauseBtn.textContent = 'Reanudar';
+        } else if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+          playbackState.isPaused = false;
+          playbackState.startedAt = performance.now();
+          pauseBtn.textContent = 'Pausa';
+        }
+      }
+
+      document.getElementById('relayBtn').addEventListener('click', startRelay);
+      document.getElementById('configureBtn').addEventListener('click', sendConfig);
+      document.getElementById('startBtn').addEventListener('click', startRun);
+      document.getElementById('refreshBtn').addEventListener('click', refreshState);
+      document.getElementById('playBtn').addEventListener('click', playPreview);
+      pauseBtn.addEventListener('click', togglePause);
+      stopBtn.addEventListener('click', () => stopPlayback(false));
+      refreshState();
+      setInterval(refreshState, 3000);
+    </script>
+  </body>
+</html>
