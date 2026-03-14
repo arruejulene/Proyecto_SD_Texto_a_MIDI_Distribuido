@@ -1,3 +1,4 @@
+# monitor/store.py
 from __future__ import annotations
 
 from collections import deque
@@ -28,6 +29,18 @@ class MonitorStore:
             if message_id:
                 self.delivery_by_id[str(message_id)] = str(enriched.get("command") or enriched.get("type") or "EVENT")
 
+        origen = enriched.get("processor") or enriched.get("from", "Desconocido")
+        comando = enriched.get("command", "EVENTO")
+        
+        if comando == "EVENT_SONADO":
+            nota = enriched.get("note", "-")
+            token = enriched.get("token", "")
+            print(f"[{enriched['ts']}] [MONITOR LOG] {origen} -> Tocando nota {nota} para la palabra '{token}'")
+        elif comando == "SYSTEM":
+            print(f"[{enriched['ts']}] [MONITOR SYS] {enriched.get('message')}")
+        else:
+            print(f"[{enriched['ts']}] [MONITOR LOG] {origen} -> {comando}: {enriched.get('file', '')}")
+    
     def push_system(self, message: str, **extra: Any) -> None:
         self.add_event({"command": "SYSTEM", "processor": "director", "message": message, **extra})
 

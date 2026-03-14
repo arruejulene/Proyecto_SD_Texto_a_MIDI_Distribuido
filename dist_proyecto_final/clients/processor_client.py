@@ -1,4 +1,8 @@
 from __future__ import annotations
+# clients/processor_client.py
+import os
+os.environ["MIDO_BACKEND"] = "mido.backends.pygame"
+import mido
 
 import argparse
 import socket
@@ -51,52 +55,66 @@ class ProcessorClient:
         content = file_path.read_text(encoding="utf-8")
         structure = self.analyzer.analyze_structure(content)
         events = self.analyzer.build_events(content, bpm)
-        self.log(f"Procesando {file_path.name}: {len(events)} eventos, tipo={structure['work_type']}, cadencia={structure['cadence']}")
-        self._send_private(
-            {
-                "command": "JOB_STARTED",
-                "processor": self.name,
-                "file": file_path.name,
-                "total_events": len(events),
-                "work_type": structure["work_type"],
-                "lexical_density": structure["lexical_density"],
-                "lexical_diversity": structure["lexical_diversity"],
-                "cadence": structure["cadence"],
-            },
-            wait_ack=True,
-        )
+        
+        self.log(f"Procesando {file_path.name}: {len(events)} eventos, tipo={structure['work_type']}")
+        
+        try:
+            midi_port = mido.open_output()
+        except Exception as e:
+            self.log(f"Advertencia: No se pudo abrir el puerto MIDI. Ejecutando en silencio. Error: {e}")
+            midi_port = None
+
+        self._send_private({
+            "command": "JOB_STARTED",
+            "processor": self.name,
+            "file": file_path.name,
+            "total_events": len(events),
+            "work_type": structure["work_type"],
+            "lexical_density": structure["lexical_density"],
+            "lexical_diversity": structure["lexical_diversity"],
+            "cadence": structure["cadence"],
+        }, wait_ack=True)
+
         for index, event in enumerate(events, start=1):
             midi = self.mapper.to_midi(event)
-            self._send_private(
-                {
-                    "command": "EVENT_SONADO",
-                    "processor": self.name,
-                    "index": index,
-                    "token": event.token,
-                    "metric": event.metric,
-                    "midi_value": event.midi_value,
-                    "note": midi.note,
-                    "velocity": midi.velocity,
-                    "duration_ms": midi.duration_ms,
-                    "category": event.category,
-                    "work_type": event.work_type,
-                    "lexical_density": event.lexical_density,
-                    "cadence_strength": event.cadence_strength,
-                    "sentence_index": event.sentence_index,
-                },
-                wait_ack=(index <= 3 or index == len(events)),
-            )
-            time.sleep(midi.duration_ms / 1000)
-        self._send_private(
-            {
-                "command": "JOB_FINISHED",
+            
+            if midi_port:
+                msg_on = mido.Message('note_on', note=midi.note, velocity=midi.velocity, time=0)
+                midi_port.send(msg_on)
+
+            self._send_private({
+                "command": "EVENT_SONADO",
                 "processor": self.name,
-                "file": file_path.name,
-                "total_events": len(events),
-                "work_type": structure["work_type"],
-            },
-            wait_ack=True,
-        )
+                "index": index,
+                "token": event.token,
+                "metric": event.metric,
+                "midi_value": event.midi_value,
+                "note": midi.note,
+                "velocity": midi.velocity,
+                "duration_ms": midi.duration_ms,
+                "category": event.category,
+                "work_type": event.work_type,
+                "lexical_density": event.lexical_density,
+                "cadence_strength": event.cadence_strength,
+                "sentence_index": event.sentence_index,
+            }, wait_ack=(index <= 3 or index == len(events)))
+            
+            time.sleep(midi.duration_ms / 1000.0)
+
+            if midi_port:
+                msg_off = mido.Message('note_off', note=midi.note, velocity=0, time=0)
+                midi_port.send(msg_off)
+
+        if midi_port:
+            midi_port.close()
+
+        self._send_private({
+            "command": "JOB_FINISHED",
+            "processor": self.name,
+            "file": file_path.name,
+            "total_events": len(events),
+            "work_type": structure["work_type"],
+        }, wait_ack=True)
         self.log(f"Trabajo finalizado: {file_path.name}")
 
     def listen(self) -> None:
