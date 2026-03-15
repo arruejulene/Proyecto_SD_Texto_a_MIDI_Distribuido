@@ -68,47 +68,103 @@
       </section>
 
       <section class="panel rounded-3xl p-6">
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between border-b border-white/10 pb-4">
           <div>
-            <h2 class="text-xl font-semibold">Reproducir obra</h2>
-            <p class="mt-2 text-sm text-slate-300">Ocupa todo el ancho para escuchar la obra completa o una cantidad concreta de eventos.</p>
+            <h2 class="text-xl font-semibold">Reproducción Comparativa</h2>
+            <p class="mt-2 text-sm text-slate-300">Reproduce y compara simultáneamente dos obras. Cada panel tiene controles independientes, pero puedes iniciar ambas al mismo tiempo desde aquí.</p>
           </div>
           <div class="flex w-full flex-wrap gap-3 xl:w-auto xl:justify-end">
-            <select id="previewFile" class="field min-w-[180px] flex-1 xl:flex-none">{% for file in files %}<option value="{{ file }}">{{ file }}</option>{% endfor %}</select>
-            <select id="previewLimit" class="field min-w-[160px] flex-1 xl:flex-none" title="Cantidad de eventos">
-              <option value="10">10 eventos</option>
-              <option value="50">50 eventos</option>
-              <option value="100">100 eventos</option>
-              <option value="150">150 eventos</option>
-              <option value="0" selected>Obra completa</option>
-            </select>
-            <button id="playBtn" class="btn-primary rounded-2xl px-5 py-3 font-semibold min-w-[140px]">Play</button>
-            <button id="pauseBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold min-w-[140px]" disabled>Pausa</button>
-            <button id="stopBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold min-w-[140px]" disabled>Stop</button>
+            <button id="globalPlayBtn" class="btn-primary rounded-2xl px-5 py-3 font-semibold min-w-[140px]">Play Ambas</button>
+            <button id="globalPauseBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold min-w-[140px]" disabled>Pausar Ambas</button>
+            <button id="globalStopBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold min-w-[140px]" disabled>Stop Ambas</button>
           </div>
         </div>
 
-        <div class="mt-5 grid gap-4 lg:grid-cols-3">
-          <div class="rounded-2xl border border-white/10 bg-black/20 p-4 lg:col-span-2">
-            <div class="flex items-center justify-between gap-4 text-sm text-slate-300">
-              <div id="previewNow">Sin reproducción activa</div>
-              <div id="analysisBadge" class="text-emerald-300"></div>
+        <div class="mt-6 grid gap-6 xl:grid-cols-2">
+          <!-- Reproductor 1 -->
+          <div class="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4 player-container" data-player-id="1">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <h3 class="font-semibold text-lg text-emerald-400">Pista 1</h3>
+              <div class="flex flex-wrap gap-2 items-center">
+                <select class="field file-select min-w-[140px] text-sm py-1.5 px-3">{% for file in files %}<option value="{{ file }}" {% if loop.index0 == 0 %}selected{% endif %}>{{ file }}</option>{% endfor %}</select>
+                <select class="field limit-select min-w-[130px] text-sm py-1.5 px-3" title="Cantidad de eventos">
+                  <option value="10">10 eventos</option>
+                  <option value="50">50 eventos</option>
+                  <option value="100">100 eventos</option>
+                  <option value="150" selected>150 eventos</option>
+                  <option value="0">Obra completa</option>
+                </select>
+                <div class="flex gap-1 ml-2">
+                  <button class="btn-play btn-primary rounded-xl px-3 py-1.5 text-xs font-semibold">Play</button>
+                  <button class="btn-pause btn-secondary rounded-xl px-3 py-1.5 text-xs font-semibold" disabled>Pausa</button>
+                  <button class="btn-stop btn-secondary rounded-xl px-3 py-1.5 text-xs font-semibold" disabled>Stop</button>
+                </div>
+              </div>
             </div>
-            <div class="mt-4 h-4 overflow-hidden rounded-full bg-white/10">
-              <div id="progressBar" class="h-full w-0 rounded-full bg-emerald-400 transition-all"></div>
+            
+            <div class="grid gap-4 lg:grid-cols-3">
+              <div class="lg:col-span-2 space-y-2">
+                <div class="flex items-center justify-between gap-4 text-sm text-slate-300">
+                  <div class="preview-now font-medium truncate">Lista para cargar</div>
+                  <div class="analysis-badge text-emerald-300 text-xs shrink-0"></div>
+                </div>
+                <div class="h-3 overflow-hidden rounded-full bg-white/10 relative">
+                  <div class="progress-bar absolute left-0 top-0 h-full w-0 rounded-full bg-emerald-400 transition-all duration-100"></div>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                  <span class="progress-text">0%</span>
+                  <span class="remaining-text">--</span>
+                </div>
+              </div>
+              <div class="rounded-xl bg-black/30 p-3 text-xs text-slate-300 border border-white/5 space-y-1 analysis-box flex flex-col justify-center">
+                <div class="text-slate-500 italic text-center">Esperando análisis...</div>
+              </div>
             </div>
-            <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
-              <span id="progressText">0%</span>
-              <span id="remainingText">Sin datos</span>
-            </div>
+            <div class="preview-log h-40 overflow-y-auto space-y-2 pr-2 text-xs scrollbar-thin"></div>
           </div>
-          <div class="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-slate-300">
-            <div class="font-semibold text-white">Análisis</div>
-            <div id="analysisBox" class="mt-3 space-y-2"></div>
+
+          <!-- Reproductor 2 -->
+          <div class="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4 player-container" data-player-id="2">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <h3 class="font-semibold text-lg text-blue-400">Pista 2</h3>
+              <div class="flex flex-wrap gap-2 items-center">
+                <select class="field file-select min-w-[140px] text-sm py-1.5 px-3">{% for file in files %}<option value="{{ file }}" {% if loop.index0 == 1 %}selected{% endif %}>{{ file }}</option>{% endfor %}</select>
+                <select class="field limit-select min-w-[130px] text-sm py-1.5 px-3" title="Cantidad de eventos">
+                  <option value="10">10 eventos</option>
+                  <option value="50">50 eventos</option>
+                  <option value="100">100 eventos</option>
+                  <option value="150" selected>150 eventos</option>
+                  <option value="0">Obra completa</option>
+                </select>
+                <div class="flex gap-1 ml-2">
+                  <button class="btn-play bg-blue-600 hover:bg-blue-500 rounded-xl px-3 py-1.5 text-xs font-semibold text-white transition">Play</button>
+                  <button class="btn-pause btn-secondary rounded-xl px-3 py-1.5 text-xs font-semibold" disabled>Pausa</button>
+                  <button class="btn-stop btn-secondary rounded-xl px-3 py-1.5 text-xs font-semibold" disabled>Stop</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="grid gap-4 lg:grid-cols-3">
+              <div class="lg:col-span-2 space-y-2">
+                <div class="flex items-center justify-between gap-4 text-sm text-slate-300">
+                  <div class="preview-now font-medium truncate">Lista para cargar</div>
+                  <div class="analysis-badge text-blue-300 text-xs shrink-0"></div>
+                </div>
+                <div class="h-3 overflow-hidden rounded-full bg-white/10 relative">
+                  <div class="progress-bar absolute left-0 top-0 h-full w-0 rounded-full bg-blue-400 transition-all duration-100"></div>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                  <span class="progress-text">0%</span>
+                  <span class="remaining-text">--</span>
+                </div>
+              </div>
+              <div class="rounded-xl bg-black/30 p-3 text-xs text-slate-300 border border-white/5 space-y-1 analysis-box flex flex-col justify-center">
+                <div class="text-slate-500 italic text-center">Esperando análisis...</div>
+              </div>
+            </div>
+            <div class="preview-log h-40 overflow-y-auto space-y-2 pr-2 text-xs scrollbar-thin"></div>
           </div>
         </div>
-
-        <div id="previewLog" class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3"></div>
       </section>
 
       <section class="grid gap-6 lg:grid-cols-2">
@@ -123,7 +179,7 @@
             <li>• Logs con ACK, eventos y reconexión.</li>
             <li>• Diferenciación entre prosa y verso.</li>
             <li>• Mapeo MIDI multivariable.</li>
-            <li>• Reproducción completa o parcial.</li>
+            <li>• Reproducción simultánea con controles independientes.</li>
           </ul>
         </div>
       </section>
@@ -134,26 +190,25 @@
       </section>
     </main>
 
+    <style>
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+    </style>
+
     <script>
       const logList = document.getElementById('logList');
       const processorState = document.getElementById('processorState');
       const serverStatus = document.getElementById('serverStatus');
       const eventCount = document.getElementById('eventCount');
       const deliveryCount = document.getElementById('deliveryCount');
-      const previewLog = document.getElementById('previewLog');
-      const previewNow = document.getElementById('previewNow');
-      const progressBar = document.getElementById('progressBar');
-      const progressText = document.getElementById('progressText');
-      const remainingText = document.getElementById('remainingText');
-      const analysisBox = document.getElementById('analysisBox');
-      const analysisBadge = document.getElementById('analysisBadge');
-      const pauseBtn = document.getElementById('pauseBtn');
-      const stopBtn = document.getElementById('stopBtn');
+      
+      const globalPlayBtn = document.getElementById('globalPlayBtn');
+      const globalPauseBtn = document.getElementById('globalPauseBtn');
+      const globalStopBtn = document.getElementById('globalStopBtn');
+
       let latestState = null;
-      let audioContext = null;
-      let currentOscillators = [];
-      let playbackTimers = [];
-      let playbackState = { totalMs: 0, elapsedMs: 0, startedAt: 0, pausedAt: 0, isPaused: false, ended: false, intervalId: null };
 
       function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>\"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
@@ -163,87 +218,306 @@
         return 440 * Math.pow(2, (Number(note) - 69) / 12);
       }
 
-      function clearPlaybackTimers() {
-        for (const id of playbackTimers) clearTimeout(id);
-        playbackTimers = [];
-        if (playbackState.intervalId) clearInterval(playbackState.intervalId);
-        playbackState.intervalId = null;
-      }
+      // Clase Player encapsulada para soportar múltiples instancias
+      class TrackPlayer {
+        constructor(containerEl) {
+          this.container = containerEl;
+          this.id = containerEl.dataset.playerId;
+          
+          this.fileSelect = containerEl.querySelector('.file-select');
+          this.limitSelect = containerEl.querySelector('.limit-select');
+          this.playBtn = containerEl.querySelector('.btn-play');
+          this.pauseBtn = containerEl.querySelector('.btn-pause');
+          this.stopBtn = containerEl.querySelector('.btn-stop');
+          
+          this.previewNow = containerEl.querySelector('.preview-now');
+          this.analysisBadge = containerEl.querySelector('.analysis-badge');
+          this.progressBar = containerEl.querySelector('.progress-bar');
+          this.progressText = containerEl.querySelector('.progress-text');
+          this.remainingText = containerEl.querySelector('.remaining-text');
+          this.analysisBox = containerEl.querySelector('.analysis-box');
+          this.previewLog = containerEl.querySelector('.preview-log');
+          
+          this.audioContext = null;
+          this.currentOscillators = [];
+          this.playbackTimers = [];
+          
+          this.state = { 
+            totalMs: 0, 
+            elapsedMs: 0, 
+            startedAt: 0, 
+            pausedAt: 0, 
+            isPaused: false, 
+            ended: false, 
+            intervalId: null,
+            isPlaying: false
+          };
 
-      async function stopPlayback(showFinished = false) {
-        clearPlaybackTimers();
-        currentOscillators.forEach(item => {
-          try { item.osc.stop(); } catch (_) {}
-        });
-        currentOscillators = [];
-        if (audioContext) {
-          try { await audioContext.close(); } catch (_) {}
-          audioContext = null;
+          this.bindEvents();
         }
-        pauseBtn.disabled = true;
-        stopBtn.disabled = true;
-        pauseBtn.textContent = 'Pausa';
-        if (showFinished) {
-          previewNow.textContent = 'Obra terminada';
-          progressBar.style.width = '100%';
-          progressText.textContent = '100%';
-          remainingText.textContent = 'Restante: 0.0 s';
-          refreshState();
+
+        bindEvents() {
+          this.playBtn.addEventListener('click', () => this.play());
+          this.pauseBtn.addEventListener('click', () => this.togglePause());
+          this.stopBtn.addEventListener('click', () => this.stop(false));
         }
-      }
 
-      function updateProgressLoop() {
-        clearInterval(playbackState.intervalId);
-        playbackState.intervalId = setInterval(() => {
-          if (playbackState.isPaused || playbackState.ended) return;
-          const elapsed = playbackState.elapsedMs + Math.max(0, performance.now() - playbackState.startedAt);
-          const ratio = Math.min(1, elapsed / Math.max(1, playbackState.totalMs));
-          progressBar.style.width = `${ratio * 100}%`;
-          progressText.textContent = `${Math.round(ratio * 100)}%`;
-          remainingText.textContent = `Restante: ${Math.max(0, (playbackState.totalMs - elapsed) / 1000).toFixed(1)} s`;
-        }, 120);
-      }
+        clearTimers() {
+          for (const id of this.playbackTimers) clearTimeout(id);
+          this.playbackTimers = [];
+          if (this.state.intervalId) clearInterval(this.state.intervalId);
+          this.state.intervalId = null;
+        }
 
-      async function refreshState() {
-        const res = await fetch('/api/state');
-        const data = await res.json();
-        latestState = data;
-        const online = Boolean(data.connected);
-        const clientCount = (data.connected_clients || []).length;
-        serverStatus.textContent = online ? `Conectado · ${clientCount} cliente(s)` : (data.relay_port_open ? 'Relay arriba, monitor reconectando' : 'Sin conexión');
-        serverStatus.className = online ? 'mt-2 text-2xl font-semibold text-emerald-300' : 'mt-2 text-2xl font-semibold text-rose-300';
-        eventCount.textContent = (data.events || []).length;
-        deliveryCount.textContent = data.delivery_count || 0;
+        async stop(showFinished = false) {
+          this.clearTimers();
+          this.currentOscillators.forEach(item => {
+            try { item.osc.stop(); } catch (_) {}
+          });
+          this.currentOscillators = [];
+          if (this.audioContext) {
+            try { await this.audioContext.close(); } catch (_) {}
+            this.audioContext = null;
+          }
+          
+          this.state.isPlaying = false;
+          this.pauseBtn.disabled = true;
+          this.stopBtn.disabled = true;
+          this.pauseBtn.textContent = 'Pausa';
+          
+          if (showFinished) {
+            this.previewNow.textContent = 'Obra terminada';
+            this.progressBar.style.width = '100%';
+            this.progressText.textContent = '100%';
+            this.remainingText.textContent = '0.0 s';
+          }
+          updateGlobalControls();
+        }
 
-        const processors = Object.values(data.processors || {});
-        processorState.innerHTML = processors.length
-          ? processors.map(item => `
-            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <div class="flex items-center justify-between gap-4">
-                <div class="font-medium text-white">${escapeHtml(item.processor || item.from || 'nodo')}</div>
-                <div class="text-xs text-slate-400">${escapeHtml(item.ts || '')}</div>
-              </div>
-              <div class="mt-1 text-slate-300">${escapeHtml(item.command || 'sin estado')}</div>
-              <div class="mt-1 text-slate-400">${escapeHtml(item.file || item.token || item.message || '')}</div>
-            </div>
-          `).join('')
-          : '<div class="text-slate-500">Aún no hay eventos de clientes.</div>';
+        updateProgressLoop() {
+          clearInterval(this.state.intervalId);
+          this.state.intervalId = setInterval(() => {
+            if (this.state.isPaused || this.state.ended) return;
+            const elapsed = this.state.elapsedMs + Math.max(0, performance.now() - this.state.startedAt);
+            const ratio = Math.min(1, elapsed / Math.max(1, this.state.totalMs));
+            
+            this.progressBar.style.width = `${ratio * 100}%`;
+            this.progressText.textContent = `${Math.round(ratio * 100)}%`;
+            this.remainingText.textContent = `${Math.max(0, (this.state.totalMs - elapsed) / 1000).toFixed(1)} s`;
+            
+            // Auto scroll events if active
+            const activeEventIdx = Math.floor(ratio * this.totalEvents);
+            if (activeEventIdx > 0 && activeEventIdx <= this.totalEvents) {
+              const row = this.previewLog.children[activeEventIdx - 1];
+              if (row && typeof row.scrollIntoView === 'function') {
+                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }
+            }
+          }, 60); // Update relatively fast for smooth bar
+        }
 
-        const events = data.events || [];
-        logList.innerHTML = events.length
-          ? events.slice(0, 40).map(item => `
-            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <div class="font-medium text-white">${escapeHtml(item.ts || '')} · ${escapeHtml(item.processor || item.from || 'director')} · ${escapeHtml(item.command || 'EVENTO')}</div>
-                  <div class="mt-1 text-sm text-slate-400">${escapeHtml(item.message || item.file || item.token || '')}</div>
-                  <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.file || '')} ${item.index ? '· #' + escapeHtml(item.index) : ''} ${escapeHtml(item.message_id || '')}</div>
+        async play() {
+          if (!latestState || !latestState.connected) {
+            alert(`[Pista ${this.id}] Primero levanta el relay y conecta el director.`);
+            return;
+          }
+          await this.stop(false);
+          const payload = {
+            file_name: this.fileSelect.value,
+            bpm: 132,
+            limit: Number(this.limitSelect.value || 0),
+          };
+          
+          this.previewNow.textContent = 'Cargando y analizando...';
+          
+          try {
+            const res = await fetch('/api/preview', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail);
+            
+            const events = data.events || [];
+            const analysis = data.analysis || {};
+            
+            this.totalEvents = events.length;
+            this.analysisBadge.textContent = analysis.work_type === 'verse' ? 'Mio Cid (Verso)' : 'Quijote (Prosa)';
+            this.analysisBox.innerHTML = `
+              <div class="flex justify-between"><span>Tipo:</span><strong class="text-white">${escapeHtml(analysis.work_type)}</strong></div>
+              <div class="flex justify-between"><span>Cadencia:</span><strong class="text-white">${escapeHtml(analysis.cadence)}</strong></div>
+              <div class="flex justify-between"><span title="Densidad léxica">DL:</span><strong class="text-white">${escapeHtml(analysis.lexical_density)}</strong></div>
+              <div class="flex justify-between"><span title="Longitud media">L.Media:</span><strong class="text-white">${escapeHtml(analysis.avg_unit_length)}</strong></div>
+            `;
+            
+            this.previewNow.textContent = events.length ? `Reproduciendo: ${data.file}` : 'Obra vacía';
+            
+            this.previewLog.innerHTML = events.map(item => `
+              <div class="rounded-xl bg-black/40 p-2.5 transition-colors hover:bg-white/5 border border-transparent">
+                <div class="flex justify-between items-end">
+                  <div class="font-medium text-white truncate max-w-[70%]">#${item.index} · ${escapeHtml(item.token)}</div>
+                  <div class="text-xs text-slate-500 font-mono">${item.duration_ms}ms</div>
                 </div>
-                <div class="text-right text-xs text-slate-400">nota ${item.note ?? '-'} · vel ${item.velocity ?? '-'} ${item.total_events ? '· total ' + item.total_events : ''}</div>
+                <div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+                  <span class="rounded bg-white/10 px-1.5 py-0.5">${escapeHtml(item.category)}</span>
+                  <span>Nota ${item.note}</span>
+                </div>
               </div>
-            </div>
-          `).join('')
-          : '<div class="text-slate-500">Sin eventos todavía.</div>';
+            `).join('');
+
+            if (!events.length) return;
+
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.state.isPlaying = true;
+            this.pauseBtn.disabled = false;
+            this.stopBtn.disabled = false;
+            this.pauseBtn.textContent = 'Pausa';
+            updateGlobalControls();
+            
+            this.currentOscillators = [];
+            let offset = this.audioContext.currentTime + 0.1;
+            let accumulatedMs = 0;
+            
+            for (const item of events) {
+              const osc = this.audioContext.createOscillator();
+              const gain = this.audioContext.createGain();
+              osc.type = item.work_type === 'verse' ? 'triangle' : 'sine';
+              osc.frequency.value = midiToFrequency(item.note);
+              
+              const startT = offset;
+              const durT = item.duration_ms / 1000;
+              
+              gain.gain.setValueAtTime(0.0001, startT);
+              gain.gain.exponentialRampToValueAtTime(0.08, startT + 0.02);
+              gain.gain.exponentialRampToValueAtTime(0.0001, startT + durT);
+              
+              const panner = this.audioContext.createStereoPanner();
+              panner.pan.value = this.id === '1' ? -0.5 : 0.5;
+              
+              osc.connect(gain);
+              gain.connect(panner);
+              panner.connect(this.audioContext.destination);
+              
+              osc.start(startT);
+              osc.stop(startT + durT + 0.05); // slight overlap tail
+              
+              this.currentOscillators.push({ osc, gain });
+              offset += durT;
+              accumulatedMs += item.duration_ms;
+            }
+            
+            this.state.totalMs = accumulatedMs;
+            this.state.elapsedMs = 0;
+            this.state.startedAt = performance.now();
+            this.state.pausedAt = 0;
+            this.state.isPaused = false;
+            this.state.ended = false;
+            
+            this.progressBar.style.width = '0%';
+            this.progressText.textContent = '0%';
+            this.remainingText.textContent = `${(accumulatedMs / 1000).toFixed(1)} s`;
+            
+            this.updateProgressLoop();
+            
+            this.playbackTimers.push(setTimeout(async () => {
+              this.state.ended = true;
+              await this.stop(true);
+            }, accumulatedMs + 200));
+
+          } catch (e) {
+            console.error(e);
+            this.previewNow.textContent = 'Error al cargar';
+          }
+        }
+
+        async togglePause() {
+          if (!this.audioContext) return;
+          if (this.audioContext.state === 'running') {
+            await this.audioContext.suspend();
+            this.state.isPaused = true;
+            this.state.pausedAt = performance.now();
+            this.state.elapsedMs += Math.max(0, this.state.pausedAt - this.state.startedAt);
+            this.pauseBtn.textContent = 'Reanudar';
+          } else if (this.audioContext.state === 'suspended') {
+            await this.audioContext.resume();
+            this.state.isPaused = false;
+            this.state.startedAt = performance.now();
+            this.pauseBtn.textContent = 'Pausa';
+          }
+          updateGlobalControls();
+        }
+      }
+
+      // Initialize multiple players
+      const players = Array.from(document.querySelectorAll('.player-container')).map(el => new TrackPlayer(el));
+
+      // Global Controls
+      function updateGlobalControls() {
+        const anyPlaying = players.some(p => p.state.isPlaying);
+        const allPaused = players.every(p => !p.state.isPlaying || p.state.isPaused);
+        
+        globalStopBtn.disabled = !anyPlaying;
+        globalPauseBtn.disabled = !anyPlaying;
+        globalPauseBtn.textContent = allPaused && anyPlaying ? 'Reanudar Ambas' : 'Pausar Ambas';
+      }
+
+      globalPlayBtn.addEventListener('click', () => {
+        players.forEach(p => p.play());
+      });
+      globalStopBtn.addEventListener('click', () => {
+        players.forEach(p => p.stop(false));
+      });
+      globalPauseBtn.addEventListener('click', () => {
+        const allPaused = players.every(p => !p.state.isPlaying || p.state.isPaused);
+        players.forEach(p => {
+          if (p.state.isPlaying) {
+             if (allPaused && p.state.isPaused) p.togglePause();
+             else if (!allPaused && !p.state.isPaused) p.togglePause();
+          }
+        });
+      });
+
+      // Background State Refreshing
+      async function refreshState() {
+        try {
+          const res = await fetch('/api/state');
+          const data = await res.json();
+          latestState = data;
+          const online = Boolean(data.connected);
+          const clientCount = (data.connected_clients || []).length;
+          serverStatus.textContent = online ? `Conectado · ${clientCount} cliente(s)` : (data.relay_port_open ? 'Relay activo, monitor esperando' : 'Sin conexión');
+          serverStatus.className = online ? 'mt-2 text-xl font-semibold text-emerald-300' : 'mt-2 text-xl font-semibold text-rose-300';
+          eventCount.textContent = (data.events || []).length;
+          deliveryCount.textContent = data.delivery_count || 0;
+
+          const processors = Object.values(data.processors || {});
+          processorState.innerHTML = processors.length
+            ? processors.map(item => `
+              <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div class="flex items-center justify-between gap-4">
+                  <div class="font-medium text-white">${escapeHtml(item.processor || item.from || 'nodo')}</div>
+                  <div class="text-xs text-slate-400">${escapeHtml(item.ts || '')}</div>
+                </div>
+                <div class="mt-1 text-slate-300">${escapeHtml(item.command || 'sin estado')}</div>
+                <div class="mt-1 text-slate-400 text-xs truncate">${escapeHtml(item.file || item.token || item.message || '')}</div>
+              </div>
+            `).join('')
+            : '<div class="text-slate-500">Aún no hay eventos de clientes.</div>';
+
+          const events = data.events || [];
+          logList.innerHTML = events.length
+            ? events.slice(0, 30).map(item => `
+              <div class="rounded-2xl border border-white/10 bg-black/20 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                  <div class="font-medium text-white text-sm">${escapeHtml(item.ts || '')} <span class="text-emerald-400">· ${escapeHtml(item.processor || item.from || 'director')}</span> · ${escapeHtml(item.command || 'EVENTO')}</div>
+                  <div class="mt-0.5 text-xs text-slate-400">${escapeHtml(item.message || item.file || item.token || '')}</div>
+                </div>
+                <div class="md:text-right text-[11px] text-slate-500 font-mono">
+                  ${item.note ? 'N:' + item.note + ' ' : ''}${item.velocity ? 'V:' + item.velocity + ' ' : ''}${item.total_events ? 'Total:' + item.total_events : ''}
+                </div>
+              </div>
+            `).join('')
+            : '<div class="text-slate-500">Sin eventos en la red.</div>';
+        } catch(e) {}
       }
 
       async function startRelay() {
@@ -275,106 +549,11 @@
         refreshState();
       }
 
-      async function playPreview() {
-        if (!latestState || !latestState.connected) {
-          alert('Primero levanta el relay y conecta el director antes de reproducir.');
-          return;
-        }
-        await stopPlayback(false);
-        const payload = {
-          file_name: document.getElementById('previewFile').value,
-          bpm: 132,
-          limit: Number(document.getElementById('previewLimit').value || 0),
-        };
-        const res = await fetch('/api/preview', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          alert(data.detail || 'No se pudo preparar la reproducción');
-          return;
-        }
-        const events = data.events || [];
-        const analysis = data.analysis || {};
-        analysisBadge.textContent = analysis.work_type === 'verse' ? 'Mio Cid / verso' : 'Quijote / prosa';
-        analysisBox.innerHTML = `
-          <div>Tipo: <strong>${escapeHtml(analysis.work_type || '-')}</strong></div>
-          <div>Cadencia: <strong>${escapeHtml(analysis.cadence || '-')}</strong></div>
-          <div>Densidad léxica: <strong>${escapeHtml(analysis.lexical_density ?? '-')}</strong></div>
-          <div>Diversidad léxica: <strong>${escapeHtml(analysis.lexical_diversity ?? '-')}</strong></div>
-          <div>Longitud media: <strong>${escapeHtml(analysis.avg_unit_length ?? '-')}</strong></div>
-        `;
-        previewNow.textContent = events.length ? `Reproduciendo: ${data.file} · ${events.length} eventos` : 'No hay eventos para reproducir';
-        const maxLog = 60;
-        previewLog.innerHTML = events.slice(0, maxLog).map(item => `
-          <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div class="font-medium text-white">#${item.index} · ${escapeHtml(item.token)}</div>
-            <div class="mt-1 text-sm text-slate-400">Nota ${item.note} · ${item.duration_ms} ms · ${escapeHtml(item.category)}</div>
-          </div>
-        `).join('');
-        if (events.length > maxLog) {
-          previewLog.insertAdjacentHTML('beforeend', `<div class="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-slate-400">Mostrando ${maxLog} de ${events.length} eventos.</div>`);
-        }
-        if (!events.length) return;
-
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        pauseBtn.disabled = false;
-        stopBtn.disabled = false;
-        pauseBtn.textContent = 'Pausa';
-        currentOscillators = [];
-        let offset = audioContext.currentTime + 0.05;
-        let accumulatedMs = 0;
-        for (const item of events) {
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          osc.type = item.work_type === 'verse' ? 'triangle' : 'sine';
-          osc.frequency.value = midiToFrequency(item.note);
-          gain.gain.setValueAtTime(0.0001, offset);
-          gain.gain.exponentialRampToValueAtTime(0.08, offset + 0.02);
-          gain.gain.exponentialRampToValueAtTime(0.0001, offset + item.duration_ms / 1000);
-          osc.connect(gain);
-          gain.connect(audioContext.destination);
-          osc.start(offset);
-          osc.stop(offset + item.duration_ms / 1000 + 0.03);
-          currentOscillators.push({ osc, gain });
-          offset += item.duration_ms / 1000;
-          accumulatedMs += item.duration_ms;
-        }
-        playbackState = { totalMs: accumulatedMs, elapsedMs: 0, startedAt: performance.now(), pausedAt: 0, isPaused: false, ended: false, intervalId: null };
-        progressBar.style.width = '0%';
-        progressText.textContent = '0%';
-        remainingText.textContent = `Restante: ${(accumulatedMs / 1000).toFixed(1)} s`;
-        updateProgressLoop();
-        playbackTimers.push(setTimeout(async () => {
-          playbackState.ended = true;
-          await stopPlayback(true);
-        }, accumulatedMs + 120));
-        refreshState();
-      }
-
-      async function togglePause() {
-        if (!audioContext) return;
-        if (audioContext.state === 'running') {
-          await audioContext.suspend();
-          playbackState.isPaused = true;
-          playbackState.pausedAt = performance.now();
-          playbackState.elapsedMs += Math.max(0, playbackState.pausedAt - playbackState.startedAt);
-          pauseBtn.textContent = 'Reanudar';
-        } else if (audioContext.state === 'suspended') {
-          await audioContext.resume();
-          playbackState.isPaused = false;
-          playbackState.startedAt = performance.now();
-          pauseBtn.textContent = 'Pausa';
-        }
-      }
-
       document.getElementById('relayBtn').addEventListener('click', startRelay);
       document.getElementById('configureBtn').addEventListener('click', sendConfig);
       document.getElementById('startBtn').addEventListener('click', startRun);
       document.getElementById('refreshBtn').addEventListener('click', refreshState);
-      document.getElementById('playBtn').addEventListener('click', playPreview);
-      pauseBtn.addEventListener('click', togglePause);
-      stopBtn.addEventListener('click', () => stopPlayback(false));
+
       refreshState();
       setInterval(refreshState, 3000);
     </script>
