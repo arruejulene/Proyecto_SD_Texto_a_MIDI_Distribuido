@@ -42,9 +42,21 @@
               <input id="b2" class="field" type="number" min="40" max="260" value="110" />
             </div>
           </div>
-          <div class="mt-4 flex flex-wrap gap-3">
-            <button id="configureBtn" class="btn-primary rounded-2xl px-5 py-3 font-semibold">Enviar configuración</button>
-            <button id="startBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold">Enviar START</button>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button id="configureBtn" class="btn-primary rounded-2xl px-5 py-3 font-semibold text-sm">Enviar config</button>
+            <button id="startBtn" class="btn-secondary text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/10 rounded-2xl px-5 py-3 font-semibold text-sm">Start Red</button>
+            <button id="pauseNetworkBtn" class="btn-secondary text-amber-300 border-amber-500/30 hover:bg-amber-500/10 rounded-2xl px-5 py-3 font-semibold text-sm">Pausar Red</button>
+            <button id="resumeNetworkBtn" class="btn-secondary text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/10 rounded-2xl px-5 py-3 font-semibold text-sm">Reanudar</button>
+            <button id="stopNetworkBtn" class="btn-secondary text-rose-300 border-rose-500/30 hover:bg-rose-500/10 rounded-2xl px-5 py-3 font-semibold text-sm">Stop Red</button>
+          </div>
+          
+          <div class="mt-6 pt-5 border-t border-white/10">
+            <h3 class="font-semibold mb-3">Subir nueva obra</h3>
+            <div class="flex items-center gap-3">
+              <input type="file" id="uploadInput" accept=".txt" class="block w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20" />
+              <button id="uploadBtn" class="btn-primary rounded-xl px-4 py-2 text-sm font-semibold whitespace-nowrap">Subir TXT</button>
+            </div>
+            <div id="uploadStatus" class="mt-2 text-xs text-emerald-400 hidden"></div>
           </div>
         </div>
 
@@ -542,16 +554,66 @@
         refreshState();
       }
 
-      async function startRun() {
-        const res = await fetch('/api/start', { method: 'POST' });
-        const data = await res.json();
-        alert(data.message || data.detail || 'Ejecución iniciada');
-        refreshState();
+      async function triggerApi(endpoint) {
+        try {
+          const res = await fetch(endpoint, { method: 'POST' });
+          const data = await res.json();
+          alert(data.message || data.detail || 'Comando enviado');
+          refreshState();
+        } catch (e) {
+          alert('Error de conexión');
+        }
       }
 
+      async function uploadFile() {
+        const fileInput = document.getElementById('uploadInput');
+        if (!fileInput.files.length) {
+          alert('Selecciona un archivo .txt primero');
+          return;
+        }
+        
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          
+          if (!res.ok) throw new Error(data.detail || 'Error al subir');
+          
+          const statusEl = document.getElementById('uploadStatus');
+          statusEl.textContent = 'Archivo subido correctamente';
+          statusEl.classList.remove('hidden');
+          setTimeout(() => statusEl.classList.add('hidden'), 3000);
+          
+          // Actualizar dropdowns
+          if (data.files) {
+            const selects = document.querySelectorAll('select.field, select.file-select');
+            selects.forEach(select => {
+              const currentVal = select.value;
+              select.innerHTML = data.files.map(f => `<option value="${f}">${f}</option>`).join('');
+              if (data.files.includes(currentVal)) select.value = currentVal;
+              else select.value = data.files[data.files.length - 1]; // Select newest
+            });
+          }
+          
+          fileInput.value = '';
+        } catch (e) {
+          alert(e.message);
+        }
+      }
+
+      document.getElementById('uploadBtn').addEventListener('click', uploadFile);
       document.getElementById('relayBtn').addEventListener('click', startRelay);
       document.getElementById('configureBtn').addEventListener('click', sendConfig);
-      document.getElementById('startBtn').addEventListener('click', startRun);
+      document.getElementById('startBtn').addEventListener('click', () => triggerApi('/api/start'));
+      document.getElementById('pauseNetworkBtn').addEventListener('click', () => triggerApi('/api/pause'));
+      document.getElementById('resumeNetworkBtn').addEventListener('click', () => triggerApi('/api/resume'));
+      document.getElementById('stopNetworkBtn').addEventListener('click', () => triggerApi('/api/stop'));
       document.getElementById('refreshBtn').addEventListener('click', refreshState);
 
       refreshState();

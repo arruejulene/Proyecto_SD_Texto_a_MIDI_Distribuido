@@ -5,13 +5,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-
-from core.midi_mapper import MidiMapper
 from core.text_analysis import TextAnalyzer
 from monitor.orchestrator import MonitorOrchestrator
 from network.relay_server import RelayServer
@@ -130,6 +125,45 @@ async def api_start():
         raise HTTPException(status_code=503, detail="El director no está conectado al relay server.")
     orchestrator.start_run()
     return {"ok": True, "message": "Ejecución distribuida iniciada."}
+
+
+@app.post("/api/pause")
+async def api_pause():
+    if not orchestrator.ensure_connected():
+        raise HTTPException(status_code=503, detail="El director no está conectado al relay server.")
+    orchestrator.pause_run()
+    return {"ok": True, "message": "Comando de PAUSA enviado a la red."}
+
+
+@app.post("/api/resume")
+async def api_resume():
+    if not orchestrator.ensure_connected():
+        raise HTTPException(status_code=503, detail="El director no está conectado al relay server.")
+    orchestrator.resume_run()
+    return {"ok": True, "message": "Comando de REANUDAR enviado a la red."}
+
+
+@app.post("/api/stop")
+async def api_stop():
+    if not orchestrator.ensure_connected():
+        raise HTTPException(status_code=503, detail="El director no está conectado al relay server.")
+    orchestrator.stop_run()
+    return {"ok": True, "message": "Comando de STOP enviado a la red."}
+
+
+@app.post("/api/upload")
+async def api_upload(file: UploadFile = File(...)):
+    if not file.filename.endswith(".txt"):
+        raise HTTPException(status_code=400, detail="Solo se permiten archivos .txt")
+    
+    file_path = CORPUS_DIR / file.filename
+    try:
+        content = await file.read()
+        file_path.write_bytes(content)
+        orchestrator.store.push_system(f"Archivo subido: {file.filename}")
+        return {"ok": True, "message": f"Archivo {file.filename} subido correctamente", "files": _available_files()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/preview")

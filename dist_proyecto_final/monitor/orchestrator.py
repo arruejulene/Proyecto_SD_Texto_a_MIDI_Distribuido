@@ -150,3 +150,15 @@ class MonitorOrchestrator:
     def start_run(self) -> None:
         self._send_broadcast({"command": "START", "sent_at": time.time()})
         self.store.push_system("Director lanzó START a todos los clientes")
+
+    def pause_run(self) -> None:
+        self._send_broadcast({"command": "PAUSE", "sent_at": time.time()})
+        self.store.push_system("Director lanzó PAUSE a todos los clientes")
+
+    def resume_run(self) -> None:
+        self._send_broadcast({"command": "RESUME", "sent_at": time.time()})
+        self.store.push_system("Director lanzó RESUME a todos los clientes")
+
+    def stop_run(self) -> None:
+        self._send_broadcast({"command": "STOP", "sent_at": time.time()})
+        self.store.push_system("Director lanzó STOP a todos los clientes")

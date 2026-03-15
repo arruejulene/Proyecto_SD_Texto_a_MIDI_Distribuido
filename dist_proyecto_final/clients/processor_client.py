@@ -24,6 +24,9 @@ class ProcessorClient:
         self.current_config: dict = {}
         self.ack_events: dict[str, threading.Event] = {}
         self.lock = threading.Lock()
+        self._pause_event = threading.Event()
+        self._pause_event.set()  # Not paused by default
+        self._stop_event = threading.Event()
 
     def log(self, message: str) -> None:
         print(f"[{time.strftime('%H:%M:%S')}] [{self.name}] {message}")
@@ -66,6 +69,12 @@ class ProcessorClient:
             wait_ack=True,
         )
         for index, event in enumerate(events, start=1):
+            if self._stop_event.is_set():
+                self.log("Trabajo detenido por STOP")
+                break
+            
+            self._pause_event.wait()
+            
             midi = self.mapper.to_midi(event)
             self._send_private(
                 {
@@ -139,7 +148,19 @@ class ProcessorClient:
                     )
                 elif command == "START" and self.current_config:
                     self.log("START recibido")
+                    self._stop_event.clear()
+                    self._pause_event.set()
                     threading.Thread(target=self._run_job, daemon=True).start()
+                elif command == "PAUSE":
+                    self.log("PAUSE recibido")
+                    self._pause_event.clear()
+                elif command == "RESUME":
+                    self.log("RESUME recibido")
+                    self._pause_event.set()
+                elif command == "STOP":
+                    self.log("STOP recibido")
+                    self._stop_event.set()
+                    self._pause_event.set()
 
 
 def main() -> None:
