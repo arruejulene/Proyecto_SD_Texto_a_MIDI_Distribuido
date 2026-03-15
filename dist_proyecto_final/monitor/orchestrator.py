@@ -150,3 +150,9 @@ class MonitorOrchestrator:
     def start_run(self) -> None:
         self._send_broadcast({"command": "START", "sent_at": time.time()})
         self.store.push_system("Director lanzó START a todos los clientes")
+
+    def control_processor(self, processor: str, command: str) -> None:
+        valid_commands = {"PAUSE", "RESUME", "STOP"}
+        if command not in valid_commands:
+            raise ValueError(f"Comando inválido: {command}")
+        self._send_private(processor, {"command": command, "sent_at": time.time()})

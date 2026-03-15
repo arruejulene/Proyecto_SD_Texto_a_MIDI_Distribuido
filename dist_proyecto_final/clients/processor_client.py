@@ -25,6 +25,8 @@ class ProcessorClient:
         self.current_config: dict = {}
         self.ack_events: dict[str, threading.Event] = {}
         self.lock = threading.Lock()
+        self._is_paused = False
+        self._stop_requested = False
         try:
             self.midi_out = mido.open_output(name=f"Sonificado-{self.name}", virtual=False)
             self.log(f"Puerto MIDI abierto: {self.midi_out.name}")
@@ -73,6 +75,15 @@ class ProcessorClient:
             wait_ack=True,
         )
         for index, event in enumerate(events, start=1):
+            while self._is_paused:
+                if self._stop_requested:
+                    break
+                time.sleep(0.1)
+
+            if self._stop_requested:
+                self.log("Ejecución detenida por comando")
+                break
+
             midi = self.mapper.to_midi(event)
             if self.midi_out:
                 msg = mido.Message('note_on', note=midi.note, velocity=midi.velocity, channel=midi.channel)
@@ -154,7 +165,22 @@ class ProcessorClient:
                     )
                 elif command == "START" and self.current_config:
                     self.log("START recibido")
+                    self._stop_requested = False
+                    self._is_paused = False
                     threading.Thread(target=self._run_job, daemon=True).start()
+                elif command == "PAUSE":
+                    self.log("PAUSE recibido")
+                    self._is_paused = True
+                    self._send_private({"command": "STATE_UPDATE", "processor": self.name, "state": "PAUSED"})
+                elif command == "RESUME":
+                    self.log("RESUME recibido")
+                    self._is_paused = False
+                    self._send_private({"command": "STATE_UPDATE", "processor": self.name, "state": "RUNNING"})
+                elif command == "STOP":
+                    self.log("STOP recibido")
+                    self._stop_requested = True
+                    self._is_paused = False
+                    self._send_private({"command": "STATE_UPDATE", "processor": self.name, "state": "STOPPED"})
 
 
 def main() -> None:

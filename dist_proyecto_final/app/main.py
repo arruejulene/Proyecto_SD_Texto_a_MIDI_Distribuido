@@ -38,6 +38,11 @@ class PreviewPayload(BaseModel):
     limit: Optional[int] = None
 
 
+class ControlPayload(BaseModel):
+    processor: str
+    command: str
+
+
 orchestrator = MonitorOrchestrator(host="127.0.0.1", port=5050, corpus_dir=CORPUS_DIR)
 orchestrator.store.push_system("Aplicación iniciada. Levanta el relay y conecta los clientes para empezar.")
 relay_server_instance: RelayServer | None = None
@@ -130,6 +135,17 @@ async def api_start():
         raise HTTPException(status_code=503, detail="El director no está conectado al relay server.")
     orchestrator.start_run()
     return {"ok": True, "message": "Ejecución distribuida iniciada."}
+
+
+@app.post("/api/processor/control")
+async def api_processor_control(payload: ControlPayload):
+    if not orchestrator.ensure_connected():
+        raise HTTPException(status_code=503, detail="El director no está conectado al relay server.")
+    try:
+        orchestrator.control_processor(payload.processor, payload.command)
+        return {"ok": True, "message": f"Comando {payload.command} enviado a {payload.processor}."}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/api/preview")
