@@ -13,6 +13,7 @@ class MonitorStore:
         self.status_by_processor: dict[str, dict[str, Any]] = {}
         self.delivery_by_id: dict[str, str] = {}
         self.lock = Lock()
+        self._event_id_counter = 0
 
     def add_event(self, event: dict[str, Any]) -> None:
         enriched = {
@@ -20,6 +21,8 @@ class MonitorStore:
             **event,
         }
         with self.lock:
+            enriched["_id"] = self._event_id_counter
+            self._event_id_counter += 1
             self.events.appendleft(enriched)
             processor = enriched.get("processor") or enriched.get("from")
             if processor:

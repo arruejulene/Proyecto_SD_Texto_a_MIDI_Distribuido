@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+import asyncio
+import json
 import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 from core.text_analysis import TextAnalyzer
+from core.midi_mapper import MidiMapper
 from monitor.orchestrator import MonitorOrchestrator
 from network.relay_server import RelayServer
 
@@ -97,6 +103,26 @@ async def api_state():
     data["available_files"] = _available_files()
     data["connected_clients"] = [name for name in data.get("processors", {}).keys() if name != "director"]
     return JSONResponse(data)
+
+
+@app.get("/api/stream")
+async def api_stream(request: Request):
+    async def event_generator():
+        last_id = -1
+        while True:
+            if await request.is_disconnected():
+                break
+            new_events = []
+            with orchestrator.store.lock:
+                for ev in orchestrator.store.events:
+                    if ev.get("_id", -1) > last_id:
+                        new_events.append(ev)
+            new_events.reverse()
+            for ev in new_events:
+                last_id = ev.get("_id", -1)
+                yield f"data: {json.dumps(ev)}\n\n"
+            await asyncio.sleep(0.1)
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 @app.post("/api/relay/start")

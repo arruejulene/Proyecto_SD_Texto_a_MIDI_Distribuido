@@ -25,39 +25,12 @@
 
     <main class="mx-auto max-w-7xl px-6 pb-8 space-y-6">
       <section class="grid gap-6 lg:grid-cols-3">
-        <div class="panel rounded-3xl p-6 lg:col-span-2">
-          <h2 class="text-xl font-semibold">Configuración distribuida</h2>
-          <p class="mt-2 text-sm text-slate-300">Asigna obra y BPM a cada procesador y lanza la ejecución distribuida.</p>
-          <div class="mt-5 grid gap-4 lg:grid-cols-2">
-            <div class="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-3">
-              <div class="font-semibold">Cliente 1</div>
-              <input id="p1" class="field" value="procesador-a" />
-              <select id="f1" class="field">{% for file in files %}<option value="{{ file }}">{{ file }}</option>{% endfor %}</select>
-              <input id="b1" class="field" type="number" min="40" max="260" value="144" />
-            </div>
-            <div class="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-3">
-              <div class="font-semibold">Cliente 2</div>
-              <input id="p2" class="field" value="procesador-b" />
-              <select id="f2" class="field">{% for file in files %}<option value="{{ file }}">{{ file }}</option>{% endfor %}</select>
-              <input id="b2" class="field" type="number" min="40" max="260" value="110" />
-            </div>
-          </div>
-          <div class="mt-4 flex flex-wrap gap-2">
-            <button id="configureBtn" class="btn-primary rounded-2xl px-5 py-3 font-semibold text-sm">Enviar config</button>
-            <button id="startBtn" class="btn-secondary text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/10 rounded-2xl px-5 py-3 font-semibold text-sm">Start Red</button>
-            <button id="pauseNetworkBtn" class="btn-secondary text-amber-300 border-amber-500/30 hover:bg-amber-500/10 rounded-2xl px-5 py-3 font-semibold text-sm">Pausar Red</button>
-            <button id="resumeNetworkBtn" class="btn-secondary text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/10 rounded-2xl px-5 py-3 font-semibold text-sm">Reanudar</button>
-            <button id="stopNetworkBtn" class="btn-secondary text-rose-300 border-rose-500/30 hover:bg-rose-500/10 rounded-2xl px-5 py-3 font-semibold text-sm">Stop Red</button>
-          </div>
-          
-          <div class="mt-6 pt-5 border-t border-white/10">
-            <h3 class="font-semibold mb-3">Subir nueva obra</h3>
-            <div class="flex items-center gap-3">
-              <input type="file" id="uploadInput" accept=".txt" class="block w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20" />
-              <button id="uploadBtn" class="btn-primary rounded-xl px-4 py-2 text-sm font-semibold whitespace-nowrap">Subir TXT</button>
-            </div>
-            <div id="uploadStatus" class="mt-2 text-xs text-emerald-400 hidden"></div>
-          </div>
+        <div class="panel rounded-3xl p-6 lg:col-span-2 flex flex-col justify-center items-center text-center">
+           <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 20.944a11.955 11.955 0 01-8.618-3.04m16.236 0a11.955 11.955 0 01-8.618 3.04"></path></svg>
+           </div>
+           <h2 class="text-xl font-bold">Sistema de Sonorización Literaria</h2>
+           <p class="text-slate-400 text-sm mt-1 max-w-md">Nodo central activo. Configura las pistas abajo para comenzar la síntesis distribuida.</p>
         </div>
 
         <aside class="panel rounded-3xl p-6">
@@ -80,37 +53,47 @@
       </section>
 
       <section class="panel rounded-3xl p-6">
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between border-b border-white/10 pb-4">
-          <div>
-            <h2 class="text-xl font-semibold">Reproducción Comparativa</h2>
-            <p class="mt-2 text-sm text-slate-300">Reproduce y compara simultáneamente dos obras. Cada panel tiene controles independientes, pero puedes iniciar ambas al mismo tiempo desde aquí.</p>
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between border-b border-white/10 pb-6">
+          <div class="space-y-1">
+            <h2 class="text-2xl font-bold tracking-tight">Consola de Control Unificada</h2>
+            <p class="text-sm text-slate-400">Gestión de red, carga de archivos y monitoreo en vivo de pistas.</p>
           </div>
-          <div class="flex w-full flex-wrap gap-3 xl:w-auto xl:justify-end">
-            <button id="globalPlayBtn" class="btn-primary rounded-2xl px-5 py-3 font-semibold min-w-[140px]">Play Ambas</button>
-            <button id="globalPauseBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold min-w-[140px]" disabled>Pausar Ambas</button>
-            <button id="globalStopBtn" class="btn-secondary rounded-2xl px-5 py-3 font-semibold min-w-[140px]" disabled>Stop Ambas</button>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/10">
+              <input type="file" id="uploadInput" accept=".txt" class="block w-48 text-[10px] text-slate-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20" />
+              <button id="uploadBtn" class="bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all">Subir</button>
+            </div>
+            <div class="h-8 w-px bg-white/10 mx-1"></div>
+            <div class="flex flex-wrap gap-2">
+              <button id="configureBtn" class="btn-primary rounded-2xl px-4 py-2 font-bold text-[10px] uppercase tracking-wider">Configurar</button>
+              <button id="startBtn" class="btn-secondary text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/10 rounded-2xl px-4 py-2 font-bold text-[10px] uppercase tracking-wider">Start</button>
+              <button id="stopNetworkBtn" class="btn-secondary text-rose-300 border-rose-500/30 hover:bg-rose-500/10 rounded-2xl px-4 py-2 font-bold text-[10px] uppercase tracking-wider">Stop</button>
+            </div>
           </div>
         </div>
+        <div id="uploadStatus" class="mt-2 text-center text-xs text-emerald-400 hidden"></div>
 
         <div class="mt-6 grid gap-6 xl:grid-cols-2">
           <!-- Reproductor 1 -->
           <div class="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4 player-container" data-player-id="1">
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
-              <h3 class="font-semibold text-lg text-emerald-400">Pista 1</h3>
-              <div class="flex flex-wrap gap-2 items-center">
-                <select class="field file-select min-w-[140px] text-sm py-1.5 px-3">{% for file in files %}<option value="{{ file }}" {% if loop.index0 == 0 %}selected{% endif %}>{{ file }}</option>{% endfor %}</select>
-                <select class="field limit-select min-w-[130px] text-sm py-1.5 px-3" title="Cantidad de eventos">
-                  <option value="10">10 eventos</option>
-                  <option value="50">50 eventos</option>
-                  <option value="100">100 eventos</option>
-                  <option value="150" selected>150 eventos</option>
-                  <option value="0">Obra completa</option>
-                </select>
-                <div class="flex gap-1 ml-2">
-                  <button class="btn-play btn-primary rounded-xl px-3 py-1.5 text-xs font-semibold">Play</button>
-                  <button class="btn-pause btn-secondary rounded-xl px-3 py-1.5 text-xs font-semibold" disabled>Pausa</button>
-                  <button class="btn-stop btn-secondary rounded-xl px-3 py-1.5 text-xs font-semibold" disabled>Stop</button>
+            <div class="flex flex-col gap-4 border-b border-white/10 pb-4">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-lg text-emerald-400 tracking-wide uppercase">Pista 1</h3>
+                <div class="flex items-center gap-2">
+                   <span class="text-[10px] text-slate-500 font-bold uppercase">Nodo:</span>
+                   <span id="p1_label" class="text-[10px] font-mono text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase">procesador-a</span>
+                   <input type="hidden" id="p1" value="procesador-a" />
                 </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                 <div class="space-y-1">
+                   <label class="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Obra Literaria</label>
+                   <select id="f1" class="field file-select text-xs py-1.5 px-3 bg-black/40">{% for file in files %}<option value="{{ file }}" {% if loop.index0 == 0 %}selected{% endif %}>{{ file }}</option>{% endfor %}</select>
+                 </div>
+                 <div class="space-y-1">
+                   <label class="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Ritmo (BPM)</label>
+                   <input id="b1" class="field text-xs py-1.5 px-3 bg-black/40" type="number" min="40" max="260" value="144" />
+                 </div>
               </div>
             </div>
             
@@ -137,22 +120,24 @@
 
           <!-- Reproductor 2 -->
           <div class="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4 player-container" data-player-id="2">
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
-              <h3 class="font-semibold text-lg text-blue-400">Pista 2</h3>
-              <div class="flex flex-wrap gap-2 items-center">
-                <select class="field file-select min-w-[140px] text-sm py-1.5 px-3">{% for file in files %}<option value="{{ file }}" {% if loop.index0 == 1 %}selected{% endif %}>{{ file }}</option>{% endfor %}</select>
-                <select class="field limit-select min-w-[130px] text-sm py-1.5 px-3" title="Cantidad de eventos">
-                  <option value="10">10 eventos</option>
-                  <option value="50">50 eventos</option>
-                  <option value="100">100 eventos</option>
-                  <option value="150" selected>150 eventos</option>
-                  <option value="0">Obra completa</option>
-                </select>
-                <div class="flex gap-1 ml-2">
-                  <button class="btn-play bg-blue-600 hover:bg-blue-500 rounded-xl px-3 py-1.5 text-xs font-semibold text-white transition">Play</button>
-                  <button class="btn-pause btn-secondary rounded-xl px-3 py-1.5 text-xs font-semibold" disabled>Pausa</button>
-                  <button class="btn-stop btn-secondary rounded-xl px-3 py-1.5 text-xs font-semibold" disabled>Stop</button>
+            <div class="flex flex-col gap-4 border-b border-white/10 pb-4">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-lg text-blue-400 tracking-wide uppercase">Pista 2</h3>
+                <div class="flex items-center gap-2">
+                   <span class="text-[10px] text-slate-500 font-bold uppercase">Nodo:</span>
+                   <span id="p2_label" class="text-[10px] font-mono text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 uppercase">procesador-b</span>
+                   <input type="hidden" id="p2" value="procesador-b" />
                 </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                 <div class="space-y-1">
+                   <label class="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Obra Literaria</label>
+                   <select id="f2" class="field file-select text-xs py-1.5 px-3 bg-black/40">{% for file in files %}<option value="{{ file }}" {% if loop.index0 == 1 %}selected{% endif %}>{{ file }}</option>{% endfor %}</select>
+                 </div>
+                 <div class="space-y-1">
+                   <label class="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Ritmo (BPM)</label>
+                   <input id="b2" class="field text-xs py-1.5 px-3 bg-black/40" type="number" min="40" max="260" value="110" />
+                 </div>
               </div>
             </div>
             
@@ -216,10 +201,6 @@
       const eventCount = document.getElementById('eventCount');
       const deliveryCount = document.getElementById('deliveryCount');
       
-      const globalPlayBtn = document.getElementById('globalPlayBtn');
-      const globalPauseBtn = document.getElementById('globalPauseBtn');
-      const globalStopBtn = document.getElementById('globalStopBtn');
-
       let latestState = null;
 
       function escapeHtml(value) {
@@ -236,257 +217,127 @@
           this.container = containerEl;
           this.id = containerEl.dataset.playerId;
           
-          this.fileSelect = containerEl.querySelector('.file-select');
-          this.limitSelect = containerEl.querySelector('.limit-select');
-          this.playBtn = containerEl.querySelector('.btn-play');
-          this.pauseBtn = containerEl.querySelector('.btn-pause');
-          this.stopBtn = containerEl.querySelector('.btn-stop');
-          
           this.previewNow = containerEl.querySelector('.preview-now');
-          this.analysisBadge = containerEl.querySelector('.analysis-badge');
           this.progressBar = containerEl.querySelector('.progress-bar');
           this.progressText = containerEl.querySelector('.progress-text');
           this.remainingText = containerEl.querySelector('.remaining-text');
           this.analysisBox = containerEl.querySelector('.analysis-box');
           this.previewLog = containerEl.querySelector('.preview-log');
           
-          this.audioContext = null;
-          this.currentOscillators = [];
-          this.playbackTimers = [];
+          this.isPaused = false;
+          this.totalEvents = 1;
+        }
+
+        handleJobStart(data) {
+          this.totalEvents = data.total_events || 1;
+          this.analysisBox.innerHTML = `
+            <div class="flex justify-between"><span>Tipo:</span><strong class="text-white">${escapeHtml(data.work_type)}</strong></div>
+            <div class="flex justify-between"><span>Cadencia:</span><strong class="text-white">${escapeHtml(data.cadence)}</strong></div>
+            <div class="flex justify-between"><span title="Densidad léxica">DL:</span><strong class="text-white">${escapeHtml(data.lexical_density)}</strong></div>
+          `;
+          this.previewNow.textContent = 'Analizando en vivo de la red...';
+          this.progressBar.style.width = '0%';
+          this.progressText.textContent = '0%';
+          this.remainingText.textContent = '--';
+          this.previewLog.innerHTML = '';
+          this.isPaused = false;
+        }
+
+        livePlayEvent(item) {
+          if (this.isPaused || !globalAudioCtx) return;
           
-          this.state = { 
-            totalMs: 0, 
-            elapsedMs: 0, 
-            startedAt: 0, 
-            pausedAt: 0, 
-            isPaused: false, 
-            ended: false, 
-            intervalId: null,
-            isPlaying: false
-          };
-
-          this.bindEvents();
-        }
-
-        bindEvents() {
-          this.playBtn.addEventListener('click', () => this.play());
-          this.pauseBtn.addEventListener('click', () => this.togglePause());
-          this.stopBtn.addEventListener('click', () => this.stop(false));
-        }
-
-        clearTimers() {
-          for (const id of this.playbackTimers) clearTimeout(id);
-          this.playbackTimers = [];
-          if (this.state.intervalId) clearInterval(this.state.intervalId);
-          this.state.intervalId = null;
-        }
-
-        async stop(showFinished = false) {
-          this.clearTimers();
-          this.currentOscillators.forEach(item => {
-            try { item.osc.stop(); } catch (_) {}
-          });
-          this.currentOscillators = [];
-          if (this.audioContext) {
-            try { await this.audioContext.close(); } catch (_) {}
-            this.audioContext = null;
-          }
+          // Audio Web API synthesis
+          const osc = globalAudioCtx.createOscillator();
+          const gain = globalAudioCtx.createGain();
+          osc.type = item.work_type === 'verse' ? 'triangle' : 'sine';
+          osc.frequency.value = midiToFrequency(item.note);
           
-          this.state.isPlaying = false;
-          this.pauseBtn.disabled = true;
-          this.stopBtn.disabled = true;
-          this.pauseBtn.textContent = 'Pausa';
+          const startT = globalAudioCtx.currentTime;
+          const durT = item.duration_ms / 1000;
           
-          if (showFinished) {
-            this.previewNow.textContent = 'Obra terminada';
-            this.progressBar.style.width = '100%';
-            this.progressText.textContent = '100%';
-            this.remainingText.textContent = '0.0 s';
-          }
-          updateGlobalControls();
-        }
-
-        updateProgressLoop() {
-          clearInterval(this.state.intervalId);
-          this.state.intervalId = setInterval(() => {
-            if (this.state.isPaused || this.state.ended) return;
-            const elapsed = this.state.elapsedMs + Math.max(0, performance.now() - this.state.startedAt);
-            const ratio = Math.min(1, elapsed / Math.max(1, this.state.totalMs));
-            
-            this.progressBar.style.width = `${ratio * 100}%`;
-            this.progressText.textContent = `${Math.round(ratio * 100)}%`;
-            this.remainingText.textContent = `${Math.max(0, (this.state.totalMs - elapsed) / 1000).toFixed(1)} s`;
-            
-            // Auto scroll events if active
-            const activeEventIdx = Math.floor(ratio * this.totalEvents);
-            if (activeEventIdx > 0 && activeEventIdx <= this.totalEvents) {
-              const row = this.previewLog.children[activeEventIdx - 1];
-              if (row && typeof row.scrollIntoView === 'function') {
-                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-              }
-            }
-          }, 60); // Update relatively fast for smooth bar
-        }
-
-        async play() {
-          if (!latestState || !latestState.connected) {
-            alert(`[Pista ${this.id}] Primero levanta el relay y conecta el director.`);
-            return;
-          }
-          await this.stop(false);
-          const payload = {
-            file_name: this.fileSelect.value,
-            bpm: 132,
-            limit: Number(this.limitSelect.value || 0),
-          };
+          gain.gain.setValueAtTime(0.0001, startT);
+          gain.gain.exponentialRampToValueAtTime(0.08, startT + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startT + durT);
           
-          this.previewNow.textContent = 'Cargando y analizando...';
+          const panner = globalAudioCtx.createStereoPanner();
+          panner.pan.value = this.id === '1' ? -0.5 : 0.5;
           
-          try {
-            const res = await fetch('/api/preview', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.detail);
-            
-            const events = data.events || [];
-            const analysis = data.analysis || {};
-            
-            this.totalEvents = events.length;
-            this.analysisBadge.textContent = analysis.work_type === 'verse' ? 'Mio Cid (Verso)' : 'Quijote (Prosa)';
-            this.analysisBox.innerHTML = `
-              <div class="flex justify-between"><span>Tipo:</span><strong class="text-white">${escapeHtml(analysis.work_type)}</strong></div>
-              <div class="flex justify-between"><span>Cadencia:</span><strong class="text-white">${escapeHtml(analysis.cadence)}</strong></div>
-              <div class="flex justify-between"><span title="Densidad léxica">DL:</span><strong class="text-white">${escapeHtml(analysis.lexical_density)}</strong></div>
-              <div class="flex justify-between"><span title="Longitud media">L.Media:</span><strong class="text-white">${escapeHtml(analysis.avg_unit_length)}</strong></div>
-            `;
-            
-            this.previewNow.textContent = events.length ? `Reproduciendo: ${data.file}` : 'Obra vacía';
-            
-            this.previewLog.innerHTML = events.map(item => `
-              <div class="rounded-xl bg-black/40 p-2.5 transition-colors hover:bg-white/5 border border-transparent">
-                <div class="flex justify-between items-end">
-                  <div class="font-medium text-white truncate max-w-[70%]">#${item.index} · ${escapeHtml(item.token)}</div>
-                  <div class="text-xs text-slate-500 font-mono">${item.duration_ms}ms</div>
-                </div>
-                <div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
-                  <span class="rounded bg-white/10 px-1.5 py-0.5">${escapeHtml(item.category)}</span>
-                  <span>Nota ${item.note}</span>
-                </div>
-              </div>
-            `).join('');
+          osc.connect(gain);
+          gain.connect(panner);
+          panner.connect(globalAudioCtx.destination);
+          
+          osc.start(startT);
+          osc.stop(startT + durT + 0.05);
 
-            if (!events.length) return;
-
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            this.state.isPlaying = true;
-            this.pauseBtn.disabled = false;
-            this.stopBtn.disabled = false;
-            this.pauseBtn.textContent = 'Pausa';
-            updateGlobalControls();
-            
-            this.currentOscillators = [];
-            let offset = this.audioContext.currentTime + 0.1;
-            let accumulatedMs = 0;
-            
-            for (const item of events) {
-              const osc = this.audioContext.createOscillator();
-              const gain = this.audioContext.createGain();
-              osc.type = item.work_type === 'verse' ? 'triangle' : 'sine';
-              osc.frequency.value = midiToFrequency(item.note);
-              
-              const startT = offset;
-              const durT = item.duration_ms / 1000;
-              
-              gain.gain.setValueAtTime(0.0001, startT);
-              gain.gain.exponentialRampToValueAtTime(0.08, startT + 0.02);
-              gain.gain.exponentialRampToValueAtTime(0.0001, startT + durT);
-              
-              const panner = this.audioContext.createStereoPanner();
-              panner.pan.value = this.id === '1' ? -0.5 : 0.5;
-              
-              osc.connect(gain);
-              gain.connect(panner);
-              panner.connect(this.audioContext.destination);
-              
-              osc.start(startT);
-              osc.stop(startT + durT + 0.05); // slight overlap tail
-              
-              this.currentOscillators.push({ osc, gain });
-              offset += durT;
-              accumulatedMs += item.duration_ms;
-            }
-            
-            this.state.totalMs = accumulatedMs;
-            this.state.elapsedMs = 0;
-            this.state.startedAt = performance.now();
-            this.state.pausedAt = 0;
-            this.state.isPaused = false;
-            this.state.ended = false;
-            
-            this.progressBar.style.width = '0%';
-            this.progressText.textContent = '0%';
-            this.remainingText.textContent = `${(accumulatedMs / 1000).toFixed(1)} s`;
-            
-            this.updateProgressLoop();
-            
-            this.playbackTimers.push(setTimeout(async () => {
-              this.state.ended = true;
-              await this.stop(true);
-            }, accumulatedMs + 200));
-
-          } catch (e) {
-            console.error(e);
-            this.previewNow.textContent = 'Error al cargar';
-          }
-        }
-
-        async togglePause() {
-          if (!this.audioContext) return;
-          if (this.audioContext.state === 'running') {
-            await this.audioContext.suspend();
-            this.state.isPaused = true;
-            this.state.pausedAt = performance.now();
-            this.state.elapsedMs += Math.max(0, this.state.pausedAt - this.state.startedAt);
-            this.pauseBtn.textContent = 'Reanudar';
-          } else if (this.audioContext.state === 'suspended') {
-            await this.audioContext.resume();
-            this.state.isPaused = false;
-            this.state.startedAt = performance.now();
-            this.pauseBtn.textContent = 'Pausa';
-          }
-          updateGlobalControls();
+          // Update UI
+          this.previewNow.textContent = `Vivo: #${item.index} ${item.token}`;
+          const ratio = Math.min(1, item.index / this.totalEvents);
+          this.progressBar.style.width = `${ratio * 100}%`;
+          this.progressText.textContent = `${Math.round(ratio * 100)}%`;
+          
+          // Log prepending
+          const div = document.createElement('div');
+          div.className = "rounded-xl bg-black/40 p-2.5 transition-colors border border-transparent";
+          div.innerHTML = `
+            <div class="flex justify-between items-end">
+              <div class="font-medium text-white truncate max-w-[70%]">#${item.index} · ${escapeHtml(item.token)}</div>
+              <div class="text-xs text-slate-500 font-mono">${item.duration_ms}ms</div>
+            </div>
+            <div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+              <span class="rounded bg-white/10 px-1.5 py-0.5">${escapeHtml(item.category || '')}</span>
+              <span>Nota ${item.note}</span>
+            </div>
+          `;
+          this.previewLog.prepend(div);
+          if (this.previewLog.children.length > 50) this.previewLog.lastChild.remove();
         }
       }
 
       // Initialize multiple players
       const players = Array.from(document.querySelectorAll('.player-container')).map(el => new TrackPlayer(el));
 
-      // Global Controls
-      function updateGlobalControls() {
-        const anyPlaying = players.some(p => p.state.isPlaying);
-        const allPaused = players.every(p => !p.state.isPlaying || p.state.isPaused);
-        
-        globalStopBtn.disabled = !anyPlaying;
-        globalPauseBtn.disabled = !anyPlaying;
-        globalPauseBtn.textContent = allPaused && anyPlaying ? 'Reanudar Ambas' : 'Pausar Ambas';
+      let globalAudioCtx = null;
+      function initAudio() {
+        if (!globalAudioCtx) {
+          globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (globalAudioCtx.state === 'suspended') {
+          globalAudioCtx.resume();
+        }
       }
 
-      globalPlayBtn.addEventListener('click', () => {
-        players.forEach(p => p.play());
-      });
-      globalStopBtn.addEventListener('click', () => {
-        players.forEach(p => p.stop(false));
-      });
-      globalPauseBtn.addEventListener('click', () => {
-        const allPaused = players.every(p => !p.state.isPlaying || p.state.isPaused);
-        players.forEach(p => {
-          if (p.state.isPlaying) {
-             if (allPaused && p.state.isPaused) p.togglePause();
-             else if (!allPaused && !p.state.isPaused) p.togglePause();
-          }
-        });
-      });
+      // Initialize SSE
+      const evtSource = new EventSource("/api/stream");
+      evtSource.onmessage = function(event) {
+        const item = JSON.parse(event.data);
+        const p1Name = document.getElementById('p1').value.trim();
+        const p2Name = document.getElementById('p2').value.trim();
+        
+        let targetPlayer = null;
+        if ((item.processor || item.from) === p1Name) targetPlayer = players[0];
+        if ((item.processor || item.from) === p2Name) targetPlayer = players[1];
+        
+        if (targetPlayer) {
+            if (item.command === 'JOB_STARTED') {
+                targetPlayer.handleJobStart(item);
+            } else if (item.command === 'EVENT_SONADO') {
+                targetPlayer.livePlayEvent(item);
+            } else if (item.command === 'JOB_FINISHED') {
+                targetPlayer.previewNow.textContent = 'Obra terminada en nodo central';
+            }
+        }
+      };
+
+      // Global Controls (redirected to network triggers instead of local)
+      function setConfigLocked(locked) {
+        const inputs = document.querySelectorAll('#f1, #f2, #b1, #b2, #configureBtn, #uploadBtn, #uploadInput');
+        inputs.forEach(el => el.disabled = locked);
+      }
+
+      function setNetworkLocked(locked) {
+        const btn = document.getElementById('configureBtn');
+        if (btn) btn.disabled = locked;
+      }
 
       // Background State Refreshing
       async function refreshState() {
@@ -551,6 +402,7 @@
         });
         const data = await res.json();
         alert(data.message || data.detail || 'Configuración enviada');
+        if (res.ok) setConfigLocked(true);
         refreshState();
       }
 
@@ -559,6 +411,11 @@
           const res = await fetch(endpoint, { method: 'POST' });
           const data = await res.json();
           alert(data.message || data.detail || 'Comando enviado');
+          
+          if (endpoint === '/api/stop') {
+             setConfigLocked(false);
+          }
+          
           refreshState();
         } catch (e) {
           alert('Error de conexión');
@@ -607,16 +464,43 @@
         }
       }
 
+      function updateFileSelects() {
+        const fileSelects = document.querySelectorAll('.player-container .file-select');
+        const selectedValues = Array.from(fileSelects).map(select => select.value);
+
+        fileSelects.forEach((select, index) => {
+          const options = select.querySelectorAll('option');
+          options.forEach(option => {
+            // Enable all options first
+            option.disabled = false;
+            
+            // Disable if it's selected in another dropdown
+            if (selectedValues.includes(option.value) && option.value !== select.value) {
+              option.disabled = true;
+            }
+          });
+        });
+      }
+
+      // Add event listeners to file selects in players
+      document.querySelectorAll('.player-container .file-select').forEach(select => {
+        select.addEventListener('change', updateFileSelects);
+      });
+
       document.getElementById('uploadBtn').addEventListener('click', uploadFile);
       document.getElementById('relayBtn').addEventListener('click', startRelay);
       document.getElementById('configureBtn').addEventListener('click', sendConfig);
-      document.getElementById('startBtn').addEventListener('click', () => triggerApi('/api/start'));
+      document.getElementById('startBtn').addEventListener('click', () => {
+        initAudio();
+        triggerApi('/api/start');
+      });
       document.getElementById('pauseNetworkBtn').addEventListener('click', () => triggerApi('/api/pause'));
       document.getElementById('resumeNetworkBtn').addEventListener('click', () => triggerApi('/api/resume'));
       document.getElementById('stopNetworkBtn').addEventListener('click', () => triggerApi('/api/stop'));
       document.getElementById('refreshBtn').addEventListener('click', refreshState);
 
       refreshState();
+      updateFileSelects(); // Initialize disabled state
       setInterval(refreshState, 3000);
     </script>
   </body>
