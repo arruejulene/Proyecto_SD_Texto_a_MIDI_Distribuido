@@ -126,8 +126,7 @@ class TextAnalyzer:
         if min_value == max_value:
             return 64
         scaled = ((value - min_value) / (max_value - min_value)) * 127
-        curved = int(round(math.sqrt(max(0.0, scaled / 127)) * 127))
-        return max(0, min(127, curved))
+        return max(0, min(127, int(round(scaled))))
 
     def analyze_structure(self, content: str) -> dict[str, Any]:
         work_type = self.detect_work_type(content)

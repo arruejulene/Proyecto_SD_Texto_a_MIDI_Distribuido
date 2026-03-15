@@ -7,6 +7,7 @@ import time
 import uuid
 from pathlib import Path
 
+import mido
 from core.midi_mapper import MidiMapper
 from core.text_analysis import TextAnalyzer
 from network.protocol import decode_message, encode_message
@@ -24,6 +25,12 @@ class ProcessorClient:
         self.current_config: dict = {}
         self.ack_events: dict[str, threading.Event] = {}
         self.lock = threading.Lock()
+        try:
+            self.midi_out = mido.open_output(name=f"Sonificado-{self.name}", virtual=False)
+            self.log(f"Puerto MIDI abierto: {self.midi_out.name}")
+        except Exception as e:
+            self.log(f"No se pudo abrir puerto MIDI (usando modo silencioso): {e}")
+            self.midi_out = None
 
     def log(self, message: str) -> None:
         print(f"[{time.strftime('%H:%M:%S')}] [{self.name}] {message}")
@@ -67,6 +74,14 @@ class ProcessorClient:
         )
         for index, event in enumerate(events, start=1):
             midi = self.mapper.to_midi(event)
+            if self.midi_out:
+                msg = mido.Message('note_on', note=midi.note, velocity=midi.velocity, channel=midi.channel)
+                self.midi_out.send(msg)
+                # Note off will be handled by the sleep + next note or we can send it explicitly
+                # To keep it simple and rhythmic, we'll send note_off after duration
+                timer = threading.Timer(midi.duration_ms / 1000, lambda m=midi: self.midi_out.send(mido.Message('note_off', note=m.note, channel=m.channel)) if self.midi_out else None)
+                timer.start()
+
             self._send_private(
                 {
                     "command": "EVENT_SONADO",
